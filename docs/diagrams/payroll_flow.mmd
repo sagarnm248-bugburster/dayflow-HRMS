@@ -1,0 +1,21 @@
+flowchart TD
+    Start[HR Initiates Payroll] --> FetchUser[Fetch User Salary Info]
+    FetchUser --> FetchAtt[Fetch Monthly Attendance]
+    FetchAtt --> CalcDays{Calculate Days}
+    
+    CalcDays --> Present[Present Days]
+    CalcDays --> Absent[Absent Days]
+    
+    Absent --> CheckLeaves{Paid Leaves?}
+    CheckLeaves -- Yes --> DeductQuota[Deduct Leave Quota]
+    CheckLeaves -- No --> UnpaidCalc[Calculate Deduction]
+    
+    UnpaidCalc --> TotalDed[Calculate Taxes and PF]
+    DeductQuota --> TotalDed
+    Present --> CalcBasic[Calculate Earnings]
+    
+    CalcBasic --> NetCalc[Net Salary]
+    TotalDed --> NetCalc
+    
+    NetCalc --> SaveDB[Save to Payrolls]
+    SaveDB --> End[Generate PDF]

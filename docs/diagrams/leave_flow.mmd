@@ -1,0 +1,18 @@
+sequenceDiagram
+    participant U as Employee
+    participant F as Frontend (React)
+    participant M as Middleware
+    participant B as Backend API
+    participant D as Database
+    participant S as Email Service
+    
+    U->>F: "Apply for Sick Leave"
+    F->>M: POST /api/leave/apply (Token)
+    M->>M: Validate JWT
+    M->>B: Route to Leave Controller
+    B->>B: Validate Dates & Balance
+    B->>D: Create Leave Request (Status: Pending)
+    D-->>B: Success
+    B->>S: Notify Manager (Email)
+    B-->>F: Return "Application Submitted"
+    F-->>U: Show Success Message

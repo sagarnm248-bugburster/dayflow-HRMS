@@ -1,0 +1,41 @@
+erDiagram
+    USERS ||--|| SALARY_INFO : "has"
+    USERS ||--o{ LEAVE_REQUESTS : "applies"
+    USERS ||--o{ ATTENDANCE : "marks"
+    USERS ||--o{ PAYROLLS : "receives"
+
+    USERS {
+        string _id PK
+        string username
+        string email
+        string password
+        string role "Admin/Employee"
+        string employmentType
+    }
+
+    SALARY_INFO {
+        string employee_id FK
+        float base_salary
+        float HRA
+        float DA
+        float PF
+        float net_salary
+    }
+
+    LEAVE_REQUESTS {
+        string _id PK
+        string user_id FK
+        string leaveType
+        date startDate
+        date endDate
+        string status "Pending/Approved"
+    }
+
+    PAYROLLS {
+        string _id PK
+        string employee_id FK
+        string month
+        float basic_salary
+        float total_deductions
+        float net_salary
+    }

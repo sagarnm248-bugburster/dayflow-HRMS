@@ -1,0 +1,27 @@
+graph TD
+    A[Client Browser] -->|HTTPS| B[React Frontend]
+    B -->|REST API| C[Express Backend]
+    C -->|Mongoose ORM| D[(MongoDB)]
+    C -->|Upload Files| E[Cloudinary Storage]
+    C -->|JWT Auth| F[Auth Middleware]
+    C -->|Send Emails| G[Nodemailer SMTP]
+    
+    subgraph Services [Core Modules]
+        direction TB
+        C --> H[Payroll Controller]
+        C --> I[Attendance Controller]
+        C --> J[Leave Controller]
+        C --> K[User Controller]
+    end
+    
+    subgraph Middleware [Security Layer]
+        direction TB
+        L[Auth Middleware]
+        M[CORS Policy]
+        N[Error Handling]
+    end
+    
+    H -.->|Uses| L
+    I -.->|Uses| L
+    J -.->|Uses| L
+    K -.->|Uses| L

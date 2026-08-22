@@ -1,0 +1,20 @@
+sequenceDiagram
+    autonumber
+    participant Admin as HR Admin
+    participant Server as Backend API
+    participant DB as MongoDB
+    participant Mail as Email Service
+    participant Emp as New Employee
+
+    Admin->>Server: POST /add-user
+    Server->>DB: Check Duplicate Email
+    Server->>DB: Insert User (Password: null)
+    Server-->>DB: Auto-Create Salary Record
+    Server->>Mail: Send Welcome Email (Set Password Link)
+    Mail-->>Emp: Email Delivered
+    
+    Note right of Emp: User clicks link in email
+    
+    Emp->>Server: POST /set-password (token, newPassword)
+    Server->>DB: Verify Token & Update Password
+    Server-->>Emp: Success Response
