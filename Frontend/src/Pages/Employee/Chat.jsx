@@ -41,7 +41,7 @@
 
 //       // Define the API payload
 //       const payload = { contents: chatHistory };
-//       const apiKey = "AIzaSyBf5z-UziaT2xF9G_MktZfdaEd2obV9_h0";
+// AI service route is securely proxies via backend /api/ai/chat
 //       const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
 
 //       // Make the API call to the Gemini model
