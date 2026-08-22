@@ -24,6 +24,56 @@ const Login = () => {
   const handelLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
+
+    // =========================================================================
+    // TEMPORARY DEMO LOGIN FALLBACK — REMOVE BEFORE PRODUCTION
+    // Allows immediate client-side login verification for DEMO001 / demo / demo123
+    // =========================================================================
+    const trimmedId = id.trim().toUpperCase();
+    const trimmedUsername = username.trim().toLowerCase();
+    const trimmedPassword = password.trim();
+
+    if (trimmedId === "DEMO001" || trimmedUsername === "demo") {
+      if (trimmedId === "DEMO001" && trimmedUsername === "demo" && trimmedPassword === "demo123") {
+        const demoUser = {
+          _id: "demo_user_001",
+          id: "DEMO001",
+          username: "demo",
+          name: "Demo Admin",
+          email: "demo@nmit.ac.in",
+          role: "hr",
+          department: "Human Resources",
+          designation: "HR Manager",
+          status: "Active"
+        };
+        const demoToken = "demo_jwt_token_nmit_peoplehub_2026_valid";
+
+        // ✅ Update Redux & localStorage
+        dispatch(loginUser({ user: demoUser, token: demoToken }));
+        localStorage.setItem("token", demoToken);
+        localStorage.setItem("role", "hr");
+        localStorage.setItem("user", JSON.stringify(demoUser));
+
+        toast.success("Demo Login successful! Redirecting to HR Dashboard...", {
+          position: "bottom-right",
+        });
+
+        setTimeout(() => {
+          navigate("/hrhome");
+        }, 1000);
+
+        setLoading(false);
+        return;
+      } else {
+        toast.error("Invalid demo credentials. Use DEMO001 / demo / demo123", {
+          position: "bottom-right",
+        });
+        setLoading(false);
+        return;
+      }
+    }
+    // =========================================================================
+
     const userData = { username, password, id };
 
     try {
@@ -50,6 +100,7 @@ const Login = () => {
       // ✅ Save new token to localStorage
       localStorage.setItem("token", data.token);
       localStorage.setItem("role", role);
+      localStorage.setItem("user", JSON.stringify(data.user));
 
       toast.success("Login successful!", {
         position: "bottom-right",
