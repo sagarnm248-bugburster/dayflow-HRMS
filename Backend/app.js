@@ -64,9 +64,9 @@ app.get('/health', handleHealthCheck);
 app.get('/api/health', handleHealthCheck);
 
 // Mount API routes
-app.use('/api', leaveRoutes);
 app.use('/api', authRoutes);
 app.use('/api', userRoutes);
+app.use('/api', leaveRoutes);
 app.use('/api', attendanceRoutes);
 app.use('/api', payrollroutes);
 app.use('/api', calendar);

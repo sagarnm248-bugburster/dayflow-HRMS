@@ -1,5 +1,5 @@
 import React from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 // Layouts
@@ -15,7 +15,7 @@ import Employees from "../Pages/Admin/Employees";
 import AddEmployee from "../Pages/Admin/AddEmployee";
 import PayrollSystem from "../Pages/Admin/Payrollsystem";
 import HRCalendar from "../Pages/Admin/HRCalendar";
-import EmployeeDashboard from '../Pages/Admin/EmployeePage'
+import EmployeeDashboard from '../Pages/Admin/EmployeePage';
 import PayrollPage from "../Pages/Admin/PayrollPage";
 import Hrprofile from "../Pages/Admin/HrProfile";
 import Query from "../Pages/Admin/Query";
@@ -31,29 +31,34 @@ import Emprofile from "../Pages/Employee/Emprofile";
 import SetPassword from "../Pages/Employee/Email";
 import Chatbot from "../Pages/Employee/Chat";
 import RegisterFace from "../Pages/Employee/RegisterFace";
-
-// Common / Temp
-import Add from "../Pages/Add";
-
-//Not Found Page
-import NotFound from '../Components/NotFound'
-// import SettingsPage from "../Pages/Employee/SettingsPage";
 import Contect from "../Pages/Employee/Contect";
 import Leave from "../Pages/Employee/Leave";
 import LeaveRequests from "../Pages/Admin/LeaveRequests";
+import NotFound from '../Components/NotFound';
 
 const AppRoutes = () => {
   const token = useSelector((state) => state.auth.token);
   const user = useSelector((state) => state.auth.user);
-  const role = user?.role?.toLowerCase();
+  const role = (user?.role || "").toLowerCase();
   const isAuthenticated = !!token;
 
   return (
     <Routes>
       <Route path="/" element={<Login />} />
 
-      {/* Employee Routes */}
-      <Route path="/" element={isAuthenticated ? <EmployeeLayoutDashboard /> : <Login />}>
+      {/* Employee Routes - strictly requires employee role */}
+      <Route 
+        path="/" 
+        element={
+          !isAuthenticated ? (
+            <Navigate to="/" replace />
+          ) : role === "employee" ? (
+            <EmployeeLayoutDashboard />
+          ) : (
+            <Navigate to="/hrhome" replace />
+          )
+        }
+      >
         <Route path="emhome" element={<Dashboard />} />
         <Route path="emattendance" element={<Attendance />} />
         <Route path="emsalary" element={<Salary />} />
@@ -66,8 +71,19 @@ const AppRoutes = () => {
         <Route path="emleave" element={<Leave />} />
       </Route>
 
-      {/* HR Routes */}
-      <Route path="/" element={isAuthenticated ? <HrLayoutDashboard /> : <Login />}>
+      {/* HR Routes - strictly requires hr role */}
+      <Route 
+        path="/" 
+        element={
+          !isAuthenticated ? (
+            <Navigate to="/" replace />
+          ) : role === "hr" ? (
+            <HrLayoutDashboard />
+          ) : (
+            <Navigate to="/emhome" replace />
+          )
+        }
+      >
         <Route path="hrhome" element={<HRDashboard />} />
         <Route path="hremployees" element={<Employees />} />
         <Route path="hraddemployee" element={<AddEmployee />} />
@@ -82,7 +98,6 @@ const AppRoutes = () => {
       </Route>
 
       <Route path="/:id/set-password" element={<SetPassword />} />
-      <Route path="/add" element={<Add />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

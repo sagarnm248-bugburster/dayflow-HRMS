@@ -114,6 +114,9 @@ const updateProfile = async (req, res) => {
 const addUser = async (req, res) => {
   try {
     const db = getDB();
+    if (!req.body) {
+      return res.status(400).json({ message: "Missing request body" });
+    }
     const {
       name,
       gender,

@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
-console.log("🛠️ Loading Leave Routes...");
 const verifyToken = require('../../middlewares/authMiddleware');
+const requireRole = require('../../middlewares/roleMiddleware');
+
 const {
     applyLeave,
     getLeaveHistory,
@@ -11,13 +12,15 @@ const {
     updateLeave
 } = require('./leaveController');
 
-// Using verifyToken to protect routes, but adhering to user's URL structure
+// Open to any authenticated user
 router.post('/apply-leave', verifyToken, applyLeave);
 router.get('/my-leaves/:userId', verifyToken, getLeaveHistory);
-router.get('/all-leaves', verifyToken, getAllLeaves); // Admin check can be added inside or middleware
-router.put('/update-leave-status', verifyToken, updateLeaveStatus);
-router.delete('/:id', verifyToken, deleteLeave); // Extra
-router.put('/:id', verifyToken, updateLeave); // Extra
+
+// Protected HR-only routes
+router.get('/all-leaves', verifyToken, requireRole('hr'), getAllLeaves);
+router.put('/update-leave-status', verifyToken, requireRole('hr'), updateLeaveStatus);
+router.delete('/:id', verifyToken, requireRole('hr'), deleteLeave);
+router.put('/:id', verifyToken, requireRole('hr'), updateLeave);
 
 // Test Route
 router.get('/leave-test', (req, res) => res.send("Leave Module Working"));
