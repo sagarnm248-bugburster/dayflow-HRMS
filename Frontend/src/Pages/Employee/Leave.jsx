@@ -3,6 +3,7 @@ import axios from "axios";
 import { useSelector } from "react-redux";
 import { Edit2, Trash2, Plus, X, CheckCircle, Clock, XCircle } from "lucide-react";
 import { API_BASE_URL } from "../../config/api";
+import { getStatusColorClass } from "../../config/constants";
 
 const Leave = () => {
     const [leaves, setLeaves] = useState([]);
@@ -94,9 +95,7 @@ const Leave = () => {
     };
 
     const getStatusClass = (status) => {
-        if (status === "Approved") return "bg-green-100 text-green-700 border-green-200";
-        if (status === "Rejected") return "bg-red-100 text-red-700 border-red-200";
-        return "bg-yellow-100 text-yellow-700 border-yellow-200";
+        return getStatusColorClass(status);
     };
 
     return (

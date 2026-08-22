@@ -77,8 +77,23 @@ const Profile = () => {
   }, [id, dispatch, usersdata]);
 
   if (!employee) return (
-    <div className="bg-surface w-full lg:w-1/4 rounded-2xl shadow-sm border border-border p-6 flex justify-center items-center h-64">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+    <div className="bg-surface w-full lg:w-1/4 rounded-2xl shadow-sm border border-border p-6 h-fit space-y-6 animate-pulse">
+      <div className="flex flex-col items-center text-center pb-6 border-b border-border">
+        <div className="w-24 h-24 rounded-full bg-gray-200 mb-4 shadow-sm"></div>
+        <div className="h-6 w-32 bg-gray-200 rounded mb-2"></div>
+        <div className="h-4 w-20 bg-gray-200 rounded"></div>
+      </div>
+      <div className="space-y-4">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-gray-200 rounded-lg"></div>
+            <div className="space-y-1.5 flex-1">
+              <div className="h-3 w-16 bg-gray-200 rounded"></div>
+              <div className="h-4 w-24 bg-gray-200 rounded"></div>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 
@@ -213,7 +228,30 @@ function InfoTab() {
     setShowModal(true);
   };
 
-  if (!employee) return <div className="text-center py-10 text-text-sub">{message}</div>;
+  if (!employee) {
+    if (message.includes("Loading")) {
+      return (
+        <div className="space-y-6 animate-pulse">
+          <div className="flex justify-between items-center pb-2">
+            <div>
+              <div className="h-6 w-48 bg-gray-200 rounded mb-2"></div>
+              <div className="h-4 w-64 bg-gray-200 rounded text-sm"></div>
+            </div>
+            <div className="h-10 w-24 bg-gray-200 rounded-xl"></div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50/50 p-6 rounded-2xl border border-border">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="space-y-2">
+                <div className="h-3 w-16 bg-gray-200 rounded"></div>
+                <div className="h-4 w-32 bg-gray-200 rounded"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+    return <div className="text-center py-10 text-text-sub">{message}</div>;
+  }
 
   return (
     <>
@@ -309,7 +347,27 @@ function SalaryInfoTab() {
     fetchSalaryInfo();
   }, [id]);
 
-  if (!employee) return <div className="text-center py-10 text-text-sub">{message}</div>;
+  if (!employee) {
+    if (message.includes("Loading")) {
+      return (
+        <div className="space-y-6 animate-pulse">
+          <div>
+            <div className="h-6 w-48 bg-gray-200 rounded mb-2"></div>
+            <div className="h-4 w-64 bg-gray-200 rounded text-sm"></div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50/50 p-6 rounded-2xl border border-border">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="space-y-2">
+                <div className="h-3 w-16 bg-gray-200 rounded"></div>
+                <div className="h-4 w-32 bg-gray-200 rounded"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+    return <div className="text-center py-10 text-text-sub">{message}</div>;
+  }
 
   return (
     <div className="space-y-6">

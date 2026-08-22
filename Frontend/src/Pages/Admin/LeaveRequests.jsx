@@ -3,6 +3,7 @@ import axios from "axios";
 import { useSelector } from "react-redux";
 import { Check, X, Search, Filter, Calendar } from "lucide-react";
 import { API_BASE_URL } from "../../config/api";
+import { getStatusColorClass } from "../../config/constants";
 
 const LeaveRequests = () => {
     const [leaves, setLeaves] = useState([]);
@@ -112,12 +113,7 @@ const LeaveRequests = () => {
                                         <td className="p-4 text-gray-600 max-w-xs truncate">{leave.reason}</td>
                                         <td className="p-4">
                                             <span
-                                                className={`px-3 py-1 rounded-full text-xs font-semibold border ${leave.status === "Approved"
-                                                        ? "bg-green-100 text-green-700 border-green-200"
-                                                        : leave.status === "Rejected"
-                                                            ? "bg-red-100 text-red-700 border-red-200"
-                                                            : "bg-yellow-100 text-yellow-700 border-yellow-200"
-                                                    }`}
+                                                className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColorClass(leave.status)}`}
                                             >
                                                 {leave.status}
                                             </span>
@@ -150,8 +146,12 @@ const LeaveRequests = () => {
                             </tbody>
                         </table>
                         {filteredLeaves.length === 0 && (
-                            <div className="p-8 text-center text-gray-400">
-                                No leave requests found.
+                            <div className="p-12 text-center text-gray-400 flex flex-col items-center justify-center gap-3">
+                                <div className="p-4 bg-gray-50 rounded-full border border-gray-100 shadow-inner">
+                                    <Calendar className="text-gray-300 w-8 h-8" />
+                                </div>
+                                <p className="font-semibold text-gray-700">No Leave Requests Found</p>
+                                <p className="text-xs text-gray-400 max-w-xs">All caught up! There are no pending or approved leave requests matching this filter.</p>
                             </div>
                         )}
                     </div>
