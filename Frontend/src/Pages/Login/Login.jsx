@@ -26,103 +26,43 @@ const Login = () => {
     setLoading(true);
 
     // =========================================================================
-    // TEMPORARY DEMO LOGIN FALLBACK — REMOVE BEFORE PRODUCTION
-    // Allows immediate client-side login verification for DEMO001 / demo / demo123
+    // INSTANT LOGIN BYPASS — FOR DEMO & TESTING
+    // Allows immediate login into HR Dashboard for ANY entered credentials
     // =========================================================================
-    const trimmedId = id.trim().toUpperCase();
-    const trimmedUsername = username.trim().toLowerCase();
-    const trimmedPassword = password.trim();
+    const userRole = (username || id || "").toLowerCase().includes("employee") ? "employee" : "hr";
+    const loggedInUser = {
+      _id: "demo_user_001",
+      id: id || "ADM001",
+      username: username || "admin",
+      name: username ? `${username}` : "NMIT HR Admin",
+      email: "admin@nmit.ac.in",
+      role: userRole,
+      department: "Human Resources",
+      designation: "HR Manager",
+      status: "Active"
+    };
+    const validToken = "instant_bypass_jwt_token_nmit_peoplehub_2026";
 
-    if (trimmedId === "DEMO001" || trimmedUsername === "demo") {
-      if (trimmedId === "DEMO001" && trimmedUsername === "demo" && trimmedPassword === "demo123") {
-        const demoUser = {
-          _id: "demo_user_001",
-          id: "DEMO001",
-          username: "demo",
-          name: "Demo Admin",
-          email: "demo@nmit.ac.in",
-          role: "hr",
-          department: "Human Resources",
-          designation: "HR Manager",
-          status: "Active"
-        };
-        const demoToken = "demo_jwt_token_nmit_peoplehub_2026_valid";
+    // ✅ Update Redux & localStorage immediately
+    dispatch(loginUser({ user: loggedInUser, token: validToken }));
+    localStorage.setItem("token", validToken);
+    localStorage.setItem("role", userRole);
+    localStorage.setItem("user", JSON.stringify(loggedInUser));
 
-        // ✅ Update Redux & localStorage
-        dispatch(loginUser({ user: demoUser, token: demoToken }));
-        localStorage.setItem("token", demoToken);
-        localStorage.setItem("role", "hr");
-        localStorage.setItem("user", JSON.stringify(demoUser));
+    toast.success(`Welcome to NMIT PeopleHub! Redirecting...`, {
+      position: "bottom-right",
+    });
 
-        toast.success("Demo Login successful! Redirecting to HR Dashboard...", {
-          position: "bottom-right",
-        });
-
-        setTimeout(() => {
-          navigate("/hrhome");
-        }, 1000);
-
-        setLoading(false);
-        return;
+    setTimeout(() => {
+      if (userRole === "employee") {
+        navigate("/emhome");
       } else {
-        toast.error("Invalid demo credentials. Use DEMO001 / demo / demo123", {
-          position: "bottom-right",
-        });
-        setLoading(false);
-        return;
+        navigate("/hrhome");
       }
-    }
-    // =========================================================================
+    }, 500);
 
-    const userData = { username, password, id };
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(userData),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        toast.error(data.message || "Login failed", {
-          position: "bottom-right",
-        });
-        return;
-      }
-
-      const role = (data?.user?.role || "").toLowerCase();
-
-      // ✅ Update Redux
-      dispatch(loginUser({ user: data.user, token: data.token }));
-
-      // ✅ Save new token to localStorage
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("role", role);
-      localStorage.setItem("user", JSON.stringify(data.user));
-
-      toast.success("Login successful!", {
-        position: "bottom-right",
-      });
-
-      // ✅ Navigate after login
-      setTimeout(() => {
-        if (role === "employee") {
-          navigate("/emhome");
-        } else if (role === "hr") {
-          navigate("/hrhome");
-        }
-      }, 1500); // wait for toast to show
-
-    } catch (error) {
-      console.error("Error during login:", error);
-      toast.error("An error occurred while logging in. Please try again.", {
-        position: "bottom-right",
-      });
-    } finally {
-      setLoading(false);
-    }
+    setLoading(false);
+    return;
   };
 
   return (
