@@ -22,7 +22,7 @@ const connectToMongoDB = async () => {
     db = process.env.MONGO_DB_NAME ? client.db(process.env.MONGO_DB_NAME) : client.db();
     console.log(`✅ MongoDB connected successfully to database: "${db.databaseName}"`);
 
-    // ✅ Ensure at least one valid HR Admin test account with bcrypt password exists
+    // ✅ Ensure valid HR Admin & Employee test accounts with bcrypt passwords exist
     try {
       const hashedPassword = await bcrypt.hash('123456', 10);
       const adminDoc = {
@@ -37,25 +37,31 @@ const connectToMongoDB = async () => {
         status: 'Active'
       };
 
+      const empDoc = {
+        user_id: 'EMP001',
+        username: 'employee',
+        email: 'employee@example.com',
+        password: hashedPassword,
+        role: 'employee',
+        name: 'John Doe',
+        department: 'Engineering',
+        designation: 'Software Engineer',
+        status: 'Active'
+      };
+
       // Upsert in primary database
-      await db.collection('users').updateOne(
-        { user_id: 'ADM001' },
-        { $set: adminDoc },
-        { upsert: true }
-      );
+      await db.collection('users').updateOne({ user_id: 'ADM001' }, { $set: adminDoc }, { upsert: true });
+      await db.collection('users').updateOne({ user_id: 'EMP001' }, { $set: empDoc }, { upsert: true });
 
       // Also upsert in 'Attendance' collection if dbName differs
       if (db.databaseName !== 'Attendance') {
         try {
-          await client.db('Attendance').collection('users').updateOne(
-            { user_id: 'ADM001' },
-            { $set: adminDoc },
-            { upsert: true }
-          );
+          await client.db('Attendance').collection('users').updateOne({ user_id: 'ADM001' }, { $set: adminDoc }, { upsert: true });
+          await client.db('Attendance').collection('users').updateOne({ user_id: 'EMP001' }, { $set: empDoc }, { upsert: true });
         } catch (e) {}
       }
 
-      console.log('✅ HR Admin test account upserted (ADM001 / admin / password: 123456)');
+      console.log('✅ HR Admin & Employee test accounts upserted with bcrypt passwords');
     } catch (seedError) {
       console.warn('⚠️ Auto-seed check warning:', seedError.message);
     }
