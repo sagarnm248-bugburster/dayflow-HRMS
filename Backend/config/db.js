@@ -17,31 +17,43 @@ const connectToMongoDB = async () => {
     }
     client = new MongoClient(mongoURI);
     await client.connect();
-    db = client.db(dbName);
-    console.log(`✅ MongoDB connected successfully to database: "${dbName}"`);
+    
+    // Use MONGO_DB_NAME if specified, else use the database specified in MONGO_URI
+    db = process.env.MONGO_DB_NAME ? client.db(process.env.MONGO_DB_NAME) : client.db();
+    console.log(`✅ MongoDB connected successfully to database: "${db.databaseName}"`);
 
     // ✅ Ensure at least one valid HR Admin test account with bcrypt password exists
     try {
-      const usersCol = db.collection('users');
       const hashedPassword = await bcrypt.hash('123456', 10);
+      const adminDoc = {
+        user_id: 'ADM001',
+        username: 'admin',
+        email: 'admin@example.com',
+        password: hashedPassword,
+        role: 'hr',
+        name: 'NMIT HR Admin',
+        department: 'Human Resources',
+        designation: 'HR Manager',
+        status: 'Active'
+      };
 
-      await usersCol.updateOne(
+      // Upsert in primary database
+      await db.collection('users').updateOne(
         { user_id: 'ADM001' },
-        {
-          $set: {
-            user_id: 'ADM001',
-            username: 'admin',
-            email: 'admin@example.com',
-            password: hashedPassword,
-            role: 'hr',
-            name: 'NMIT HR Admin',
-            department: 'Human Resources',
-            designation: 'HR Manager',
-            status: 'Active'
-          }
-        },
+        { $set: adminDoc },
         { upsert: true }
       );
+
+      // Also upsert in 'Attendance' collection if dbName differs
+      if (db.databaseName !== 'Attendance') {
+        try {
+          await client.db('Attendance').collection('users').updateOne(
+            { user_id: 'ADM001' },
+            { $set: adminDoc },
+            { upsert: true }
+          );
+        } catch (e) {}
+      }
 
       console.log('✅ HR Admin test account upserted (ADM001 / admin / password: 123456)');
     } catch (seedError) {
