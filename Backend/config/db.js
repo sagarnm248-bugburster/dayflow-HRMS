@@ -50,14 +50,14 @@ const connectToMongoDB = async () => {
       };
 
       // Upsert in primary database
-      await db.collection('users').updateOne({ user_id: 'ADM001' }, { $set: adminDoc }, { upsert: true });
-      await db.collection('users').updateOne({ user_id: 'EMP001' }, { $set: empDoc }, { upsert: true });
+      await db.collection('users').updateOne({ $or: [{ user_id: 'ADM001' }, { username: 'admin' }] }, { $set: adminDoc }, { upsert: true });
+      await db.collection('users').updateOne({ $or: [{ user_id: 'EMP001' }, { username: 'employee' }] }, { $set: empDoc }, { upsert: true });
 
       // Also upsert in 'Attendance' collection if dbName differs
       if (db.databaseName !== 'Attendance') {
         try {
-          await client.db('Attendance').collection('users').updateOne({ user_id: 'ADM001' }, { $set: adminDoc }, { upsert: true });
-          await client.db('Attendance').collection('users').updateOne({ user_id: 'EMP001' }, { $set: empDoc }, { upsert: true });
+          await client.db('Attendance').collection('users').updateOne({ $or: [{ user_id: 'ADM001' }, { username: 'admin' }] }, { $set: adminDoc }, { upsert: true });
+          await client.db('Attendance').collection('users').updateOne({ $or: [{ user_id: 'EMP001' }, { username: 'employee' }] }, { $set: empDoc }, { upsert: true });
         } catch (e) {}
       }
 
