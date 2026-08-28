@@ -23,31 +23,27 @@ const connectToMongoDB = async () => {
     // ✅ Ensure at least one valid HR Admin test account with bcrypt password exists
     try {
       const usersCol = db.collection('users');
-      const adminUser = await usersCol.findOne({ $or: [{ user_id: 'ADM001' }, { username: 'admin' }] });
-
       const hashedPassword = await bcrypt.hash('123456', 10);
 
-      if (!adminUser) {
-        await usersCol.insertOne({
-          user_id: 'ADM001',
-          username: 'admin',
-          email: 'admin@example.com',
-          password: hashedPassword,
-          role: 'hr',
-          name: 'NMIT HR Admin',
-          department: 'Human Resources',
-          designation: 'HR Manager',
-          status: 'Active',
-          createdAt: new Date()
-        });
-        console.log('✅ Created default HR Admin test account (ADM001 / admin)');
-      } else if (!adminUser.password || (!adminUser.password.startsWith('$2b$') && !adminUser.password.startsWith('$2a$'))) {
-        await usersCol.updateOne(
-          { _id: adminUser._id },
-          { $set: { password: hashedPassword } }
-        );
-        console.log('✅ Updated HR Admin password with valid bcrypt hash');
-      }
+      await usersCol.updateOne(
+        { user_id: 'ADM001' },
+        {
+          $set: {
+            user_id: 'ADM001',
+            username: 'admin',
+            email: 'admin@example.com',
+            password: hashedPassword,
+            role: 'hr',
+            name: 'NMIT HR Admin',
+            department: 'Human Resources',
+            designation: 'HR Manager',
+            status: 'Active'
+          }
+        },
+        { upsert: true }
+      );
+
+      console.log('✅ HR Admin test account upserted (ADM001 / admin / password: 123456)');
     } catch (seedError) {
       console.warn('⚠️ Auto-seed check warning:', seedError.message);
     }
