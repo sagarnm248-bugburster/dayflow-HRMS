@@ -19,13 +19,26 @@ const { getDB } = require('./config/db');
 const app = express();
 
 // ✅ Configure Production-Ready CORS
-const allowedOrigins = (process.env.FRONTEND_URLS || process.env.FRONTEND_URL || 'http://localhost:5173')
+const defaultOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'https://dayflow-hrms-smoky.vercel.app'
+];
+const envOrigins = (process.env.FRONTEND_URLS || process.env.FRONTEND_URL || '')
   .split(',')
-  .map(url => url.trim().replace(/\/$/, ''));
+  .map(url => url.trim().replace(/\/$/, ''))
+  .filter(Boolean);
+
+const allowedOrigins = [...new Set([...defaultOrigins, ...envOrigins])];
 
 app.use(cors({
   origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
+    if (
+      !origin ||
+      allowedOrigins.includes(origin) ||
+      allowedOrigins.includes('*') ||
+      /\.vercel\.app$/.test(origin)
+    ) {
       callback(null, true);
     } else {
       callback(new Error(`CORS policy violation: Origin ${origin} not allowed`));

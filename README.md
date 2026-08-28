@@ -70,7 +70,7 @@ VITE_API_URL=http://localhost:5500/api
 
 ### 1. Clone Repository
 ```bash
-git clone https://github.com/Sharan-Sanadi/DayFlow.git
+git clone https://github.com/sagarnm248-bugburster/dayflow-HRMS.git
 cd DayFlow
 ```
 
