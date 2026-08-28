@@ -71,13 +71,13 @@ const AppRoutes = () => {
         <Route path="emleave" element={<Leave />} />
       </Route>
 
-      {/* HR Routes - strictly requires hr role */}
+      {/* HR Routes - requires hr, admin, or manager role */}
       <Route 
         path="/" 
         element={
           !isAuthenticated ? (
             <Navigate to="/" replace />
-          ) : role === "hr" ? (
+          ) : (role === "hr" || role === "admin" || role === "manager") ? (
             <HrLayoutDashboard />
           ) : (
             <Navigate to="/emhome" replace />

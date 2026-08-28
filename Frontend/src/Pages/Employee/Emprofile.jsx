@@ -105,8 +105,12 @@ const Profile = () => {
       <div className="text-center">
         <div className="relative w-28 h-28 mx-auto mb-4 group">
           <img
-            src={employee.profilePic || "https://i.pravatar.cc/150?img=12"}
+            src={employee.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(employee.username || "User")}&background=6366f1&color=fff`}
             alt="Employee"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(employee.username || "User")}&background=6366f1&color=fff`;
+            }}
             className="w-full h-full rounded-full object-cover border-4 border-purple-50 shadow-md"
           />
           <button className="absolute bottom-1 right-1 bg-purple-600 text-white p-2 rounded-full shadow-lg hover:bg-purple-700 transition opacity-0 group-hover:opacity-100">

@@ -14,55 +14,83 @@ const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // ✅ CLEAR OLD TOKEN WHEN LOGIN PAGE LOADS
+  // ✅ Redirect to dashboard if user is already authenticated
   useEffect(() => {
-    console.log("🧹 Clearing old token...");
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
-  }, []);
+    const existingToken = localStorage.getItem("token");
+    const existingRole = (localStorage.getItem("role") || "").toLowerCase();
+    if (existingToken && existingRole) {
+      if (existingRole === "employee") {
+        navigate("/emhome", { replace: true });
+      } else {
+        navigate("/hrhome", { replace: true });
+      }
+    }
+  }, [navigate]);
 
   const handelLogin = async (e) => {
     e.preventDefault();
+    const loginIdentifier = (username || id || "").trim();
+    const loginPassword = (password || "").trim();
+
+    if (!loginIdentifier || !loginPassword) {
+      toast.error("⚠️ User ID/Username and Password cannot be empty!", {
+        position: "bottom-right",
+      });
+      return;
+    }
+
     setLoading(true);
 
-    // =========================================================================
-    // INSTANT LOGIN BYPASS — FOR DEMO & TESTING
-    // Allows immediate login into HR Dashboard for ANY entered credentials
-    // =========================================================================
-    const userRole = (username || id || "").toLowerCase().includes("employee") ? "employee" : "hr";
-    const loggedInUser = {
-      _id: "demo_user_001",
-      id: id || "ADM001",
-      username: username || "admin",
-      name: username ? `${username}` : "NMIT HR Admin",
-      email: "admin@nmit.ac.in",
-      role: userRole,
-      department: "Human Resources",
-      designation: "HR Manager",
-      status: "Active"
-    };
-    const validToken = "instant_bypass_jwt_token_nmit_peoplehub_2026";
+    try {
+      const response = await fetch(`${API_BASE_URL}/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: loginIdentifier,
+          password: loginPassword,
+          id: id.trim() || loginIdentifier,
+        }),
+      });
 
-    // ✅ Update Redux & localStorage immediately
-    dispatch(loginUser({ user: loggedInUser, token: validToken }));
-    localStorage.setItem("token", validToken);
-    localStorage.setItem("role", userRole);
-    localStorage.setItem("user", JSON.stringify(loggedInUser));
+      const data = await response.json();
 
-    toast.success(`Welcome to NMIT PeopleHub! Redirecting...`, {
-      position: "bottom-right",
-    });
-
-    setTimeout(() => {
-      if (userRole === "employee") {
-        navigate("/emhome");
-      } else {
-        navigate("/hrhome");
+      if (!response.ok) {
+        toast.error(`❌ ${data.message || "Invalid credentials"}`, {
+          position: "bottom-right",
+        });
+        setLoading(false);
+        return;
       }
-    }, 500);
 
-    setLoading(false);
-    return;
+      const user = data.user;
+      const token = data.token;
+      const userRole = (user?.role || "employee").toLowerCase();
+
+      // ✅ Update Redux & localStorage with REAL credentials & token
+      dispatch(loginUser({ user, token }));
+      localStorage.setItem("token", token);
+      localStorage.setItem("role", userRole);
+      localStorage.setItem("user", JSON.stringify(user));
+
+      toast.success(`Welcome ${user.username || "User"}! Redirecting...`, {
+        position: "bottom-right",
+      });
+
+      setTimeout(() => {
+        if (userRole === "employee") {
+          navigate("/emhome");
+        } else {
+          navigate("/hrhome");
+        }
+      }, 500);
+    } catch (err) {
+      console.error("Login Error:", err);
+      toast.error("❌ Network error. Failed to connect to server.", {
+        position: "bottom-right",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

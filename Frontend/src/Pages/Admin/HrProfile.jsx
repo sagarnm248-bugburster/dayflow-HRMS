@@ -101,9 +101,21 @@ const Profile = () => {
     <div className="bg-surface w-full lg:w-1/4 rounded-2xl shadow-sm border border-border p-6 h-fit space-y-6">
       {/* Profile Header */}
       <div className="flex flex-col items-center text-center pb-6 border-b border-border">
-        <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-4 shadow-sm">
-          <User size={40} />
-        </div>
+        {employee.profilePic ? (
+          <img
+            src={employee.profilePic}
+            alt={employee.username}
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(employee.username || "User")}&background=0284c7&color=fff`;
+            }}
+            className="w-24 h-24 rounded-full object-cover border-2 border-primary mb-4 shadow-sm"
+          />
+        ) : (
+          <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-4 shadow-sm">
+            <User size={40} />
+          </div>
+        )}
         <h3 className="text-xl font-bold text-text-main mb-1">{employee.username}</h3>
         <p className="text-sm text-text-sub font-medium">{employee.role || "Employee"}</p>
       </div>

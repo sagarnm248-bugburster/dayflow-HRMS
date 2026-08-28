@@ -9,43 +9,78 @@ const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
 
 // ✅ LOGIN CONTROLLER
 const login = async (req, res) => {
-  const db = getDB();
-  const { username, password, id } = req.body;
+  try {
+    const db = getDB();
+    const { username, password, id } = req.body;
 
-  if (!username || !password || !id) {
-    return res.status(400).json({ message: 'All fields required' });
+    const loginId = (username || id || "").trim();
+    const loginPass = (password || "").trim();
+
+    if (!loginId || !loginPass) {
+      return res.status(400).json({ message: 'User ID / Username / Email and Password are required' });
+    }
+
+    // Lookup by username, email, or user_id
+    const user = await db.collection('users').findOne({
+      $or: [
+        { username: loginId },
+        { email: loginId },
+        { user_id: loginId },
+        ...(id ? [{ user_id: id.trim() }] : [])
+      ]
+    });
+
+    if (!user || !user.password) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    let isMatch = false;
+    if (user.password.startsWith('$2b$') || user.password.startsWith('$2a$')) {
+      isMatch = await bcrypt.compare(loginPass, user.password);
+    } else {
+      isMatch = (loginPass === user.password);
+      if (isMatch) {
+        const hashedPassword = await bcrypt.hash(loginPass, 10);
+        await db.collection('users').updateOne(
+          { _id: user._id },
+          { $set: { password: hashedPassword } }
+        );
+      }
+    }
+
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    // ✅ Generate JWT token
+    const token = jwt.sign(
+      {
+        userId: user._id.toString(),
+        username: user.username,
+        user_id: user.user_id,
+        email: user.email,
+        role: user.role,
+      },
+      JWT_SECRET,
+      { expiresIn: JWT_EXPIRES_IN }
+    );
+
+    res.json({
+      message: '✅ Login successful',
+      token,
+      user: {
+        id: user.user_id || user._id.toString(),
+        username: user.username,
+        email: user.email,
+        role: (user.role || 'employee').toLowerCase(),
+        designation: user.designation || '',
+        department: user.department || ''
+      },
+    });
+  } catch (error) {
+    console.error('❌ Login controller error:', error);
+    res.status(500).json({ message: 'Internal server error during login' });
   }
-
-  const user = await db.collection('users').findOne({ username });
-  if (!user) return res.status(401).json({ message: 'Invalid credentials' });
-
-  const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch || user.user_id !== id) {
-    return res.status(401).json({ message: 'Invalid credentials' });
-  }
-
-  // ✅ Generate JWT token
-  const token = jwt.sign(
-    {
-      userId: user._id.toString(),
-      username: user.username,
-      email: user.email,
-      role: user.role,
-    },
-    JWT_SECRET,
-    { expiresIn: JWT_EXPIRES_IN }
-  );
-
-  res.json({
-    message: '✅ Login successful',
-    token,
-    user: {
-      id: user.user_id,
-      username: user.username,
-      email: user.email,
-      role: user.role.toLowerCase(),
-    },
-  });
 };
 
 // ✅ CHANGE PASSWORD CONTROLLER

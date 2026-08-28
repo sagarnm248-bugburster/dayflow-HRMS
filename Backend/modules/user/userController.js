@@ -267,37 +267,41 @@ const addUser = async (req, res) => {
       `;
     }
 
-    await transporter.sendMail({
-      from: `"NMIT PeopleHub" <${process.env.SMTP_EMAIL}>`,
-      to: email,
-      subject: "Welcome to NMIT PeopleHub – Set Your Password",
-      html: `
-        <p>Hello <strong>${name}</strong>,</p>
-        <p>Your HR has created an account for you in NMIT PeopleHub.</p>
-        <p>Click the link below to set your password (valid for 1 hour):</p>
-        <a href="${setPasswordLink}" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">Set Password</a>
-        <br><br>
-        <h3 style="color: #2c3e50;">📋 YOUR PERSONAL DETAILS:</h3>
-        <ul style="line-height: 1.8;">
-          <li><strong>User ID:</strong> ${id}</li>
-          <li><strong>Name:</strong> ${name}</li>
-          <li><strong>Email:</strong> ${email}</li>
-          <li><strong>Phone:</strong> ${mobile}</li>
-          <li><strong>Designation:</strong> ${designation}</li>
-          <li><strong>Employment Type:</strong> ${employmentType}</li>
-          <li><strong>Joining Date:</strong> ${joigningDate}</li>
-          <li><strong>Bank Account:</strong> ${bankAccount}</li>
-          <li><strong>IFSC:</strong> ${IFSC}</li>
-          <li><strong>Emergency Contact:</strong> ${emergencyContact}</li>
-          <li><strong>Emergency Contact Name:</strong> ${emergencyContactname}</li>
-        </ul>
-        ${salaryBreakdownHTML}
-        <br><br>
-        <p style="color: #666;">If any of these details are incorrect, please contact the HR team at ${process.env.HR_EMAIL}</p>
-        <p style="color: #666;">Thank you for joining us!</p>
-        <p style="color: #666;">Best regards,<br>HR Team</p>
-      `,
-    });
+    try {
+      await transporter.sendMail({
+        from: `"NMIT PeopleHub" <${process.env.SMTP_EMAIL}>`,
+        to: email,
+        subject: "Welcome to NMIT PeopleHub – Set Your Password",
+        html: `
+          <p>Hello <strong>${name}</strong>,</p>
+          <p>Your HR has created an account for you in NMIT PeopleHub.</p>
+          <p>Click the link below to set your password (valid for 1 hour):</p>
+          <a href="${setPasswordLink}" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">Set Password</a>
+          <br><br>
+          <h3 style="color: #2c3e50;">📋 YOUR PERSONAL DETAILS:</h3>
+          <ul style="line-height: 1.8;">
+            <li><strong>User ID:</strong> ${id}</li>
+            <li><strong>Name:</strong> ${name}</li>
+            <li><strong>Email:</strong> ${email}</li>
+            <li><strong>Phone:</strong> ${mobile}</li>
+            <li><strong>Designation:</strong> ${designation}</li>
+            <li><strong>Employment Type:</strong> ${employmentType}</li>
+            <li><strong>Joining Date:</strong> ${joigningDate}</li>
+            <li><strong>Bank Account:</strong> ${bankAccount}</li>
+            <li><strong>IFSC:</strong> ${IFSC}</li>
+            <li><strong>Emergency Contact:</strong> ${emergencyContact}</li>
+            <li><strong>Emergency Contact Name:</strong> ${emergencyContactname}</li>
+          </ul>
+          ${salaryBreakdownHTML}
+          <br><br>
+          <p style="color: #666;">If any of these details are incorrect, please contact the HR team at ${process.env.HR_EMAIL}</p>
+          <p style="color: #666;">Thank you for joining us!</p>
+          <p style="color: #666;">Best regards,<br>HR Team</p>
+        `,
+      });
+    } catch (mailErr) {
+      console.warn("⚠️ Welcome mail could not be sent:", mailErr.message);
+    }
 
     // ✅ AUTO-CREATE SALARY INFO IF WAGE PROVIDED
     if (wage && parseFloat(wage) > 0 && finalSalaryComponents && Object.keys(finalSalaryComponents).length > 0) {
